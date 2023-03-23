@@ -1,5 +1,12 @@
 var express = require("express");
 var router = express.Router();
+const Joi = require("joi");
+
+const createToDoSchema = Joi.object({
+  id: Joi.number(),
+  text: Joi.string().min(3).max(30).required().label("TO-DO text"),
+  isCompleted: Joi.boolean(),
+});
 
 let todos = [
   { id: 1, text: "Shop groceries", isCompleted: false },
@@ -31,22 +38,39 @@ router.get(
 );
 
 router.get("/:id", (req, res) => {
-  res.send(todos.filter((todo) => todo.id == req.params.id));
+  res.status(200).json(todos.filter((todo) => todo.id == req.params.id));
 });
 
 router.post("/", (req, res) => {
-  todos.push(req.body);
-  res.send(todos);
+  const { error, value } = createToDoSchema.validate(req.body);
+  if (error) {
+    return res.status(400).json(error);
+  }
+
+  todos.push(value);
+  return res.status(201).json(todos);
 });
 
 router.put("/:id", (req, res) => {
-  let editedTodo = todos.find((todo) => todo.id == req.params.id);
+  const { error, value } = createToDoSchema.validate(req.body);
+  // let editedTodo = todos.find((todo) => todo.id == req.params.id);
+  // console.log(editedTodo);
   let deletedToDo = todos.findIndex((todo) => todo.id == req.params.id);
-  todos.splice(deletedToDo, 1);
-  editedTodo = req.body;
-  todos.push(editedTodo);
 
-  res.send(todos);
+  if (deletedToDo < 0) {
+    return res
+      .status(400)
+      .json(`Item with id ${req.params.id} does not exist.`);
+  }
+
+  if (error) {
+    return res.status(400).json(error);
+  }
+  todos.splice(deletedToDo, 1);
+  // editedTodo = req.body;
+  todos.push(value);
+
+  return res.status(201).json(todos);
 });
 
 router.delete("/:id", (req, res) => {

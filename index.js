@@ -18,4 +18,8 @@ app.all("*", (req, res) => {
   res.status(404).send("<h1>404! Page not found!</h1>");
 });
 
+app.use((err, req, res, next) => {
+  res.status(500).json({ message: "Internal server error" });
+});
+
 app.listen(3001);
