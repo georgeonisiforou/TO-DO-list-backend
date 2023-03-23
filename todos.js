@@ -1,44 +1,43 @@
 var express = require("express");
 var router = express.Router();
 const Joi = require("joi");
+const { v4: uuidv4 } = require("uuid");
+
+const generateUniqueId = () => {
+  let unique = uuidv4();
+  todos.map((item) => {
+    if (item.id === unique) {
+      unique = uuidv4();
+    }
+  });
+  return unique;
+};
 
 const createToDoSchema = Joi.object({
-  id: Joi.number(),
   text: Joi.string().min(3).max(30).required().label("TO-DO text"),
-  isCompleted: Joi.boolean(),
+});
+
+const getToDobyIdSchema = Joi.object({
+  id: Joi.string().min(36).max(36).required().label("TO-DO id"),
 });
 
 let todos = [
-  { id: 1, text: "Shop groceries", isCompleted: false },
-  { id: 2, text: "Go to the cinema", isCompleted: false },
-  { id: 3, text: "Buy gift for friend", isCompleted: true },
+  { id: uuidv4(), text: "Shop groceries", isCompleted: false },
+  { id: uuidv4(), text: "Go to the cinema", isCompleted: false },
+  { id: uuidv4(), text: "Buy gift for friend", isCompleted: true },
 ];
 
-// function isLoggedIn(req, res, next) {
-//   if (req.headers.authorization === "Bearer test") {
-//     next();
-//   } else {
-//     res.status(401).send("Unauthorized");
-//   }
-// }
-
-function errorHandler(err, req, res, next) {
-  res.status(500);
-  res.render("error", { error: err });
-}
-
-router.get(
-  "/",
-
-  (req, res) => {
-    res.send(todos);
-    next();
-  },
-  errorHandler
-);
+router.get("/", (req, res) => {
+  res.json(todos);
+});
 
 router.get("/:id", (req, res) => {
-  res.status(200).json(todos.filter((todo) => todo.id == req.params.id));
+  const { error, value } = getToDobyIdSchema.validate(req.params);
+  if (error) {
+    return res.status(400).json(error);
+  }
+
+  res.status(201).json(todos.filter((todo) => todo.id == value.id));
 });
 
 router.post("/", (req, res) => {
@@ -47,14 +46,16 @@ router.post("/", (req, res) => {
     return res.status(400).json(error);
   }
 
-  todos.push(value);
+  todos.push({
+    id: generateUniqueId(),
+    text: value.text,
+    isCompleted: false,
+  });
   return res.status(201).json(todos);
 });
 
 router.put("/:id", (req, res) => {
   const { error, value } = createToDoSchema.validate(req.body);
-  // let editedTodo = todos.find((todo) => todo.id == req.params.id);
-  // console.log(editedTodo);
   let deletedToDo = todos.findIndex((todo) => todo.id == req.params.id);
 
   if (deletedToDo < 0) {
@@ -67,7 +68,6 @@ router.put("/:id", (req, res) => {
     return res.status(400).json(error);
   }
   todos.splice(deletedToDo, 1);
-  // editedTodo = req.body;
   todos.push(value);
 
   return res.status(201).json(todos);
@@ -76,7 +76,7 @@ router.put("/:id", (req, res) => {
 router.delete("/:id", (req, res) => {
   let deletedToDo = todos.findIndex((todo) => todo.id == req.params.id);
   todos.splice(deletedToDo, 1);
-  res.send(todos);
+  res.json(todos);
 });
 
 module.exports = router;
