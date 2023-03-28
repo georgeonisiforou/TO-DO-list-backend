@@ -21,6 +21,11 @@ const getToDobyIdSchema = Joi.object({
   id: Joi.string().min(36).max(36).required().label("TO-DO id"),
 });
 
+const updateTodoSchema = Joi.object({
+  text: Joi.string().min(3).max(30).required().label("TO-DO text"),
+  isCompleted: Joi.boolean().required().label("TO-DO isCompleted"),
+});
+
 let todos = [
   { id: uuidv4(), text: "Shop groceries", isCompleted: false },
   { id: uuidv4(), text: "Go to the cinema", isCompleted: false },
@@ -55,7 +60,7 @@ router.post("/", (req, res) => {
 });
 
 router.put("/:id", (req, res) => {
-  const { error, value } = createToDoSchema.validate(req.body);
+  const { error, value } = updateTodoSchema.validate(req.body);
   let deletedToDo = todos.findIndex((todo) => todo.id == req.params.id);
 
   if (deletedToDo < 0) {
@@ -68,7 +73,11 @@ router.put("/:id", (req, res) => {
     return res.status(400).json(error);
   }
   todos.splice(deletedToDo, 1);
-  todos.push(value);
+  todos.push({
+    id: generateUniqueId(),
+    text: value.text,
+    isCompleted: value.isCompleted,
+  });
 
   return res.status(201).json(todos);
 });
