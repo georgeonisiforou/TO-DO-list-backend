@@ -1,14 +1,26 @@
 var express = require("express");
 var cors = require("cors");
 var app = express();
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-var todos = require("./todos.js");
+main().catch((err) => console.log(err));
+
+async function main() {
+  await mongoose.connect(
+    `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@todolist.pozp13j.mongodb.net/?retryWrites=true&w=majority`
+  );
+}
+
+var todos = require("./routes/todos.js");
+var users = require("./routes/userRoutes.js");
 
 app.use(cors());
 
 app.use(express.json());
 
 app.use("/todoItems", todos);
+app.use("/user", users);
 
 app.get("/", (req, res) => {
   res.send("test");
