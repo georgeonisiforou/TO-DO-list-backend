@@ -1,7 +1,6 @@
 var express = require("express");
 var router = express.Router();
 const Joi = require("joi");
-const { v4: uuidv4 } = require("uuid");
 
 const ToDo = require("../models/todoModel");
 
@@ -12,11 +11,6 @@ const createToDoSchema = Joi.object({
 const updateTodoSchema = Joi.object({
   text: Joi.string().min(3).max(30).required().label("TO-DO text"),
   isCompleted: Joi.boolean().required().label("TO-DO isCompleted"),
-});
-
-const createUserSchema = Joi.object({
-  username: Joi.string().min(3).max(20).required().label("Username"),
-  password: Joi.string().required(),
 });
 
 //get all todos
@@ -42,6 +36,7 @@ router.post("/", async (req, res) => {
   const newTodo = new ToDo({
     text: value.text,
     isCompleted: false,
+    // user_id: req.params.userId,
   });
 
   await newTodo.save();
