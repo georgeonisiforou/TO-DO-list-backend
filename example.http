@@ -1,11 +1,7 @@
-PUT  http://localhost:3001/todoItems/1
+GET  http://localhost:3001/todoItems
 Authorization: Bearer test
 Content-Type: application/json
 Access-Control-Allow-Origin: http://localhost:3000
 
-{
- "id": 4,
- "text": "lolix",
- "isCompleted": false
-}
+
 ###

@@ -19,8 +19,8 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use("/todoItems", todos);
-app.use("/user", users);
+app.use("/users/:userId/todoItems", todos);
+app.use("/users", users);
 
 app.get("/", (req, res) => {
   res.send("test");

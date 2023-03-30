@@ -86,12 +86,9 @@ router.post("/sign-in", async (req, res) => {
 
 router.get("/sign-in", async (req, res) => {
   const users = await User.find();
-  res.status(200).json(users);
-});
+  const userToken = req.headers.authorization;
 
-router.get("/sign-in/:userId", async (req, res) => {
-  const user = await User.findById(req.params.userId);
-  res.status(200).json(user);
+  res.status(200).json(users);
 });
 
 module.exports = router;
